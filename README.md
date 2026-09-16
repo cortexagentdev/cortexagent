@@ -1,5 +1,7 @@
 # Cortex API
 
+[Web](https://cortexagent.tech) • [X](https://x.com/cortex_rh) • [Telegram](https://x.com/cortex_rh)
+
 Backend and smart contracts for researching tokenized equities and interacting with shared thematic vaults on Robinhood Chain.
 
 The API serves asset data, signals, thematic baskets, portfolio reads, and unsigned transaction plans. Background workers ingest market and chain data, compute signals, evaluate alerts, and index vault activity. Users sign and submit transactions with their own wallets; the API and workers do not hold deployment or user signing keys.
