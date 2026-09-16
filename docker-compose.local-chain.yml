@@ -1,0 +1,103 @@
+# A local EVM chain for the C2 vault surfaces, in containers.
+#
+# Nothing here runs on the host: Anvil, forge and cast all live in the
+# foundry image. The host needs Docker and nothing else, no foundryup.
+#
+#   docker compose -f docker-compose.local-chain.yml up -d anvil
+#   ./scripts/local-chain.sh deploy
+#
+# The chain runs with --chain-id 46630, the same id as RHC testnet. That is
+# deliberate: `themeRouter` builds its calldata for 46630, `DeployFactory`
+# refuses any other id, and the terminal copy names it in a dozen places, so
+# matching it means the api, the contracts and the wallet all need zero
+# special-casing for local. The RPC is what differs, not the id.
+#
+# Port 8545 is published on loopback only, so a wallet on this machine can
+# reach it and nothing else can (global do-not 17).
+
+name: cortex-local-chain
+
+services:
+  anvil:
+    image: ghcr.io/foundry-rs/foundry@sha256:0c00cb0bda1ab1b91c9a6bf60f4c76c09c1a8870824b6d4718afbabacf6f9a17
+    restart: unless-stopped
+    entrypoint: ["sh", "/usr/local/bin/cortex-anvil.sh"]
+    stop_grace_period: 30s
+    volumes:
+      - ./scripts/anvil-entrypoint.sh:/usr/local/bin/cortex-anvil.sh:ro
+      # Mount an existing, foundry-owned directory so the non-root process can
+      # write snapshots. Also preserves the upstream RPC cache.
+      - anvil-data:/home/foundry
+    environment:
+      # Transaction-only mining with a one-second timestamp increment keeps
+      # pinned fork feeds from expiring solely because the host was idle.
+      # An unchanged head while idle is expected during local rehearsals.
+      # --mnemonic: Anvil's default, stated explicitly because the deployer
+      #   address, and therefore the factory address, must be the same on every
+      #   fresh chain for the docs and the deployment record to stay true.
+      # Standard EIP-170/EIP-3860 limits apply to the real release.
+      LOCAL_CHAIN_MODE: "${LOCAL_CHAIN_MODE:-fork}"
+      FORK_RPC_URL: "${FORK_RPC_URL:-}"
+      RHC_RPC_URLS: "${RHC_RPC_URLS:-}"
+      FORK_BLOCK_NUMBER: "${FORK_BLOCK_NUMBER:-}"
+    ports:
+      # Loopback only. The wallet in the browser needs this; nothing else does.
+      #
+      # The host port is configurable because 8545 is the most contended port on
+      # a developer machine: any other node, a stray container, or a proxy that
+      # grabbed it first leaves Docker publishing into a port it does not own,
+      # and the symptom is a wallet that cannot reach the chain while
+      # `docker compose ps` still reports the mapping. Check with
+      # `lsof -nP -iTCP:8545 -sTCP:LISTEN`; if anything but Docker answers, set
+      # LOCAL_CHAIN_PORT to something free. The container side never changes, so
+      # `http://anvil:8545` is unaffected.
+      - "127.0.0.1:${LOCAL_CHAIN_PORT:-8545}:8545"
+    networks:
+      - cortex-local-chain
+      # Joined so the api and worker containers can reach it as http://anvil:8545.
+      - cortex
+    healthcheck:
+      test:
+        - "CMD"
+        - "cast"
+        - "block-number"
+        - "--rpc-url"
+        - "http://127.0.0.1:8545"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # One-shot toolbox. Never started by `up`; `scripts/local-chain.sh` runs it
+  # with `run --rm` so forge and cast execute in a container against a mounted
+  # copy of the repo.
+  forge:
+    image: ghcr.io/foundry-rs/foundry@sha256:0c00cb0bda1ab1b91c9a6bf60f4c76c09c1a8870824b6d4718afbabacf6f9a17
+    profiles: ["tools"]
+    entrypoint: ["sh"]
+    working_dir: /work/contracts
+    environment:
+      # Anvil's first account for this mnemonic. Unlocked, and worthless.
+      DEPLOYER: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      ETH_RPC_URL: "http://anvil:8545"
+      FOUNDRY_DISABLE_NIGHTLY_WARNING: "1"
+      LOCAL_CHAIN_MODE: "${LOCAL_CHAIN_MODE:-fork}"
+    volumes:
+      - ..:/work-parent:ro
+      - .:/work
+    networks:
+      - cortex-local-chain
+    depends_on:
+      anvil:
+        condition: service_healthy
+
+networks:
+  cortex-local-chain:
+    driver: bridge
+  # The api and worker stack, so they can resolve `anvil` by name. Declared
+  # external because docker-compose.prod.yml owns it.
+  cortex:
+    external: true
+    name: cortex_cortex
+
+volumes:
+  anvil-data:

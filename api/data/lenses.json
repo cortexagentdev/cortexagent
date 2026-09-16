@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "ai-infrastructure",
+    "name": "AI Infrastructure",
+    "thesis": "Compute, accelerators and the platforms that rent them.",
+    "color": "#4A6FFF",
+    "members": [
+      { "symbol": "NVDA", "weightPct": 32 },
+      { "symbol": "MSFT", "weightPct": 24 },
+      { "symbol": "GOOGL", "weightPct": 18 },
+      { "symbol": "PLTR", "weightPct": 14 },
+      { "symbol": "AMZN", "weightPct": 12 }
+    ]
+  },
+  {
+    "slug": "data-centers-and-power",
+    "name": "Data Centers & Power",
+    "thesis": "The physical bottleneck: racks, grid interconnects, cooling.",
+    "color": "#56CCF2",
+    "members": [
+      { "symbol": "SPY", "weightPct": 30 },
+      { "symbol": "NVDA", "weightPct": 28 },
+      { "symbol": "MSFT", "weightPct": 22 },
+      { "symbol": "QQQ", "weightPct": 20 }
+    ]
+  },
+  {
+    "slug": "defense",
+    "name": "Defense",
+    "thesis": "Sovereign spend flowing into dual-use technology.",
+    "color": "#F1557C",
+    "members": [
+      { "symbol": "PLTR", "weightPct": 40 },
+      { "symbol": "SPY", "weightPct": 35 },
+      { "symbol": "AMZN", "weightPct": 25 }
+    ]
+  },
+  {
+    "slug": "rate-cut-beneficiaries",
+    "name": "Rate-Cut Beneficiaries",
+    "thesis": "Duration-sensitive growth and broad-market beneficiaries as discount rates ease.",
+    "color": "#8A5CFF",
+    "members": [
+      { "symbol": "QQQ", "weightPct": 43.75 },
+      { "symbol": "SPY", "weightPct": 31.25 },
+      { "symbol": "BABA", "weightPct": 25 }
+    ]
+  }
+]

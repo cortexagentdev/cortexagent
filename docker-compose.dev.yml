@@ -1,0 +1,55 @@
+# Local development infrastructure. Postgres and Redis only.
+#
+# The api and the worker run on the host (`bun run dev`, `bun run worker`) against
+# these, which keeps hot reload fast. The production stack is a different file,
+# docker-compose.prod.yml, and it containerises everything (OPS-2).
+#
+#   docker compose -f docker-compose.dev.yml up -d
+#   docker compose -f docker-compose.dev.yml down          # keeps the volumes
+#   docker compose -f docker-compose.dev.yml down -v       # fresh volumes
+
+name: cortex-dev
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cortex
+      POSTGRES_PASSWORD: cortex
+      POSTGRES_DB: cortex
+    ports:
+      # Bound to loopback, not 0.0.0.0. Dev convenience only: the production
+      # stack never publishes this port at all (global do-not 17).
+      #
+      # 5433 on the host, not 5432. A Postgres installed on the host holds 5432,
+      # and Docker publishes over it without complaining: connections land on
+      # whichever bound first, so the symptom is a confusing authentication or
+      # "role does not exist" error rather than a port conflict.
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cortex -d cortex"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      # 6380 for the same reason as Postgres above.
+      - "127.0.0.1:6380:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+  redis-data:

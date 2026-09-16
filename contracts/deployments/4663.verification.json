@@ -1,0 +1,116 @@
+{
+  "chainId": 4663,
+  "checkedAt": "2026-09-15T20:19:39.486Z",
+  "submissionBlocker": "Authenticated PRO API status reads succeed. Source verification POST requests return HTTP 500 on both RPC routes and the REST standard-input route.",
+  "contracts": [
+    {
+      "address": "0x1E3A7d310FA0686BF804cF5bA5086b35E8113921",
+      "contract": "VaultDeployer",
+      "is_verified": true,
+      "is_partially_verified": true,
+      "is_fully_verified": false,
+      "name": "VaultDeployer",
+      "compiler": "v0.8.28+commit.7893614a"
+    },
+    {
+      "address": "0xF9a1297b28116b0C241a0F55ED6ED79514aeF349",
+      "contract": "UniswapV3SwapRouter02Adapter",
+      "is_verified": true,
+      "is_partially_verified": true,
+      "is_fully_verified": false,
+      "name": "UniswapV3SwapRouter02Adapter",
+      "compiler": "v0.8.28+commit.7893614a"
+    },
+    {
+      "address": "0xDA01ee6AF692cf53B8Ec662a95C389bFb64ccb2C",
+      "contract": "PresetThemeFactory",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0x1892292CC6E492833BB45721E0996EF0423B8D7a",
+      "contract": "ThemeToken",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0x527F86FC8F0d0f5f664960Cc7f17d25D8f3EEF50",
+      "contract": "KeylessVault",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0xB1940d1E1F03Ec07329676B64CA8C14e349ED28E",
+      "contract": "FeeController",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0x951d33246B78C73031503FFf2d5744776A94317C",
+      "contract": "ThemeToken",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0x92178a8072Fd38c7290eD7f6675Ae2d5AfFFcc25",
+      "contract": "KeylessVault",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0xeB1d42d2973D7828D34b4886eEc9e9Ec56CaFd78",
+      "contract": "FeeController",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0x972DcB97e70855D0eb280032b3eBd07742925C66",
+      "contract": "ThemeToken",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0x23232C10949203486a4ae2E9e1d04C828e292b82",
+      "contract": "KeylessVault",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0xB48f0fD0424Fc2E7448C8825E9648F7056358a5E",
+      "contract": "FeeController",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0xcA013B24f02013a7D348F2b3ae22B5f0B45394aE",
+      "contract": "ThemeToken",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0x9F3F00A13026fD0b9494a673aBfaD9bE176FD00E",
+      "contract": "KeylessVault",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    },
+    {
+      "address": "0x4D008b204118130D18D5dCE9Aa48F17c25D5fF8a",
+      "contract": "FeeController",
+      "is_verified": false,
+      "is_partially_verified": false,
+      "is_fully_verified": false
+    }
+  ]
+}

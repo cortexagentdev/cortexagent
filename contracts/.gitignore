@@ -1,0 +1,11 @@
+# Foundry build artifacts
+out/
+cache/
+broadcast/
+!broadcast/**/dry-run/
+
+# Coverage
+lcov.info
+
+# Local env
+.env

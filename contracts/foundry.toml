@@ -1,0 +1,57 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+
+# Pinned, never floated. A moving compiler is a moving bytecode target for a set
+# of contracts that ship with no upgrade path and no rescue function (Design Law
+# 4), so the exact solc build is part of the artifact.
+solc_version = "0.8.28"
+evm_version = "shanghai"
+
+# Deterministic optimizer settings. runs=200 is the deploy-once / call-many
+# profile that fits ThemeToken and the vault.
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+
+# Reproducible production artifacts; CREATE addresses depend on account nonce,
+# not on init-code hashes. Local and production use this same profile.
+bytecode_hash = "none"
+cbor_metadata = false
+
+fs_permissions = [{ access = "read", path = "./" }, { access = "read", path = "../api/data" }]
+
+[invariant]
+# Handler assertions must fail the run, not be discarded as reverted fuzz actions.
+fail_on_revert = true
+
+[fmt]
+line_length = 100
+tab_width = 4
+bracket_spacing = true
+sort_imports = true
+
+# Fork endpoints.
+#
+#   rhc_testnet (46630) — the ONLY deploy target for C2. No real value, from
+#                         anyone, including the owner (locked decision 5).
+#   rhc_mainnet (4663)  — READ-ONLY. Used for fork tests against the real
+#                         Chainlink AggregatorV3 feeds the vault (BE-25b) will
+#                         price against. Never a deploy target. Every PART 10
+#                         mainnet gate is still open.
+#
+# Public endpoints, verified 2026-08-17 by eth_chainId in spec/CortexBackend.md
+# PART 9. To use a keyed RPC (e.g. Alchemy) instead, pass `--fork-url <url>` on
+# the command line or override the alias with `FOUNDRY_RPC_ENDPOINTS`.
+[rpc_endpoints]
+rhc_testnet = "https://rpc.testnet.chain.robinhood.com"
+rhc_mainnet = "https://rpc.mainnet.chain.robinhood.com"
+
+[etherscan]
+# Blockscout instances, no API key required. Kept for `forge verify-contract`
+# once BE-25e deploys to testnet.
+rhc_testnet = { key = "unset", url = "https://explorer.testnet.chain.robinhood.com/api", chain = 46630 }
+rhc_mainnet = { key = "unset", url = "https://robinhoodchain.blockscout.com/api", chain = 4663 }

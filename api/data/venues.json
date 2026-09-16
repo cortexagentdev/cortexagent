@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "seedVersion": 2,
+  "source": "plans/mainnet-fork/evidence/all-lens-execution-research.md",
+  "venues": [
+    {
+      "name": "uniswap-v3-rhc",
+      "protocolVariant": "uniswap-v3-swaprouter02",
+      "factory": "0x1f7d7550b1b028f7571e69a784071f0205fd2efa",
+      "router": "0xcaf681a66d020601342297493863e78c959e5cb2",
+      "quoter": "0x33e885ed0ec9bf04ecfb19341582aadcb4c8a9e7",
+      "deployBlock": "8930",
+      "deployBlockHash": "0x33e6e93cf3f8520bf51b844961e3938fd2d47013b7f0b32ed662e24cb89ac901",
+      "supportedFees": [500, 3000],
+      "supportedIntermediates": [],
+      "verificationStatus": "verified",
+      "verifiedSource": "https://github.com/Uniswap/contracts/blob/56928a9bb63d4b94fa41bbb104c22b5f759997e0/deployments/4663.md",
+      "pools": [
+        {
+          "address": "0xaae0d815ee56e4092a5e5c2911e676fea50b2d6d",
+          "token0": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "token1": "0xaf3d76f1834a1d425780943c99ea8a608f8a93f9",
+          "feePips": 500,
+          "firstSeenBlock": "59352209",
+          "firstSeenBlockHash": "0xb438d303b71665583807e347ca00799722779a339e999fda5f8963dc03a70936",
+          "provenance": "stage-01-verified-candidate"
+        },
+        {
+          "address": "0xeb60bcd1d920ad6e102690ccfc6fb488899e1510",
+          "token0": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "token1": "0xe93237c50d904957cf27e7b1133b510c669c2e74",
+          "feePips": 3000,
+          "firstSeenBlock": "59352209",
+          "firstSeenBlockHash": "0xb438d303b71665583807e347ca00799722779a339e999fda5f8963dc03a70936",
+          "provenance": "stage-01-verified-candidate"
+        },
+        {
+          "address": "0xd4eb21209c4d6093f80b5b84f5c45cc093ea14a3",
+          "token0": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "token1": "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec",
+          "feePips": 500,
+          "firstSeenBlock": "59352209",
+          "firstSeenBlockHash": "0xb438d303b71665583807e347ca00799722779a339e999fda5f8963dc03a70936",
+          "provenance": "stage-01-verified-candidate"
+        },
+        {
+          "address": "0x34d0dc122cf9a8eb296fc5e0d3a233625d7d19b7",
+          "token0": "0x2e0847e8910a9732eb3fb1bb4b70a580adad4fe3",
+          "token1": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "feePips": 500,
+          "firstSeenBlock": "60570973",
+          "firstSeenBlockHash": "0x21dd09aba68b0a08cd7008acdddb2fca67c9c858ef5d0c8e778a631ebd77749d",
+          "provenance": "lens-execution-research"
+        },
+        {
+          "address": "0x8ac92da74ab5f3b1d024dc1943ad7e15dc4179ef",
+          "token0": "0x12f190a9f9d7d37a250758b26824b97ce941bf54",
+          "token1": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "feePips": 3000,
+          "firstSeenBlock": "60584900",
+          "firstSeenBlockHash": "0xb8445222b8cbdc20db67b8e33eb9c5ef05ff91afd26e56cc7a57b4fa94eb30ad",
+          "provenance": "lens-execution-research"
+        },
+        {
+          "address": "0x851680416a4f4e1c463d45171d61acddbc8554c0",
+          "token0": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "token1": "0x894e1ec2d74ffe5aef8dc8a9e84686accb964f2a",
+          "feePips": 3000,
+          "firstSeenBlock": "60570973",
+          "firstSeenBlockHash": "0x21dd09aba68b0a08cd7008acdddb2fca67c9c858ef5d0c8e778a631ebd77749d",
+          "provenance": "lens-execution-research"
+        },
+        {
+          "address": "0xa7bb1ac63bbab0c44316e6c8c455213441689167",
+          "token0": "0x117cc2133c37b721f49de2a7a74833232b3b4c0c",
+          "token1": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "feePips": 500,
+          "firstSeenBlock": "60570973",
+          "firstSeenBlockHash": "0x21dd09aba68b0a08cd7008acdddb2fca67c9c858ef5d0c8e778a631ebd77749d",
+          "provenance": "lens-execution-research"
+        },
+        {
+          "address": "0xd60a5d14db690b7afad71f76b108071d7175597d",
+          "token0": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "token1": "0xd5f3879160bc7c32ebb4dc785f8a4f505888de68",
+          "feePips": 500,
+          "firstSeenBlock": "60570973",
+          "firstSeenBlockHash": "0x21dd09aba68b0a08cd7008acdddb2fca67c9c858ef5d0c8e778a631ebd77749d",
+          "provenance": "lens-execution-research"
+        },
+        {
+          "address": "0xfab520051f96f4d2a32c22b6a3dd7fffdf231bfe",
+          "token0": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "token1": "0x92fd66527192e3e61d4ddd13322aa222de86f9b5",
+          "feePips": 3000,
+          "firstSeenBlock": "60570973",
+          "firstSeenBlockHash": "0x21dd09aba68b0a08cd7008acdddb2fca67c9c858ef5d0c8e778a631ebd77749d",
+          "provenance": "lens-execution-research"
+        },
+        {
+          "address": "0xa57ab582b310dd6f9e934ea1eeea152741545e6a",
+          "token0": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "token1": "0xad25ac6c84d497db898fa1e8387bf6af3532a1c4",
+          "feePips": 3000,
+          "firstSeenBlock": "60570973",
+          "firstSeenBlockHash": "0x21dd09aba68b0a08cd7008acdddb2fca67c9c858ef5d0c8e778a631ebd77749d",
+          "provenance": "lens-execution-research"
+        }
+      ]
+    }
+  ]
+}

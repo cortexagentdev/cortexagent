@@ -1,0 +1,1 @@
+ALTER TABLE "execution_discovery_progress" ADD COLUMN "last_error" text;

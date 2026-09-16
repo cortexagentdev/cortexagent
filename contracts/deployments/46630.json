@@ -1,0 +1,11 @@
+{
+  "_comment": "RHC testnet (46630) deployment record. Fill in after each broadcast. This is the only deploy target for C2 (locked decision 5). Mainnet 4663 is never recorded here because nothing ships there until every CortexBackend.md PART 10 gate closes.",
+  "_apiConfig": "themeRouter.deploy (BE-29) cannot encode a deployTheme() call until three values exist: themeFactory below, plus the settlement token and the rebalance venue allowlist. The api reads all three from env (RHC_TESTNET_THEME_FACTORY, RHC_TESTNET_USDG, RHC_TESTNET_REBALANCE_VENUES, see api/.env.example) and themeRouter.readiness() names whichever are still unset. Every one of them is null here because none has been sourced. They are deliberately not guessed: the vault deployTheme creates is immutable and has no rescue function, so a wrong usdg or venue is permanent. Fill these in and the env vars together.",
+  "chainId": 46630,
+  "themeFactory": null,
+  "protocolFeeSink": null,
+  "usdg": null,
+  "rebalanceVenues": [],
+  "deployedAt": null,
+  "themes": []
+}

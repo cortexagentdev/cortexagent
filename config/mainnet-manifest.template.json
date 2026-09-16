@@ -1,0 +1,73 @@
+{
+  "manifestStatus": "awaiting-operator-deployment",
+  "schemaVersion": 1,
+  "deploymentId": "mainnet-4663-preset-v6-zero-fee-v1",
+  "mode": "robinhood-mainnet",
+  "chainId": 4663,
+  "usdg": {
+    "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+    "decimals": 6
+  },
+  "release": {
+    "schemaVersion": 1,
+    "version": "preset-v6-zero-fee-v1",
+    "standardLimits": true,
+    "routeHash": "0xca4f99515cc5c2869190f7c90e0209c7b069f4dc275ef0d03864b13c02355f3e",
+    "factory": null,
+    "adapter": null,
+    "protocolFeeSink": null,
+    "build": {
+      "sourceCommit": null,
+      "toolchain": "ghcr.io/foundry-rs/foundry@sha256:0c00cb0bda1ab1b91c9a6bf60f4c76c09c1a8870824b6d4718afbabacf6f9a17",
+      "compiler": "0.8.28+commit.7893614a",
+      "evmVersion": "shanghai",
+      "optimizerRuns": 200,
+      "viaIR": true,
+      "bytecodeHash": "none",
+      "cborMetadata": false,
+      "command": "forge build --sizes"
+    }
+  },
+  "verifiedInputs": {
+    "protocolVariant": "uniswap-v3-swaprouter02",
+    "factory": "0x1f7d7550b1b028f7571e69a784071f0205fd2efa",
+    "router": "0xcaf681a66d020601342297493863e78c959e5cb2",
+    "quoter": "0x33e885ed0ec9bf04ecfb19341582aadcb4c8a9e7",
+    "constituents": [
+      {
+        "symbol": "AAPL",
+        "address": "0xaf3d76f1834a1d425780943c99ea8a608f8a93f9",
+        "feed": "0x6B22A786bAa607d76728168703a39Ea9C99f2cD0",
+        "pool": "0xaae0d815ee56e4092a5e5c2911e676fea50b2d6d",
+        "feePips": 500
+      },
+      {
+        "symbol": "MSFT",
+        "address": "0xe93237c50d904957cf27e7b1133b510c669c2e74",
+        "feed": "0x45C3C877C15E6BA2EBB19eA114Ea508d14C1Af2E",
+        "pool": "0xeb60bcd1d920ad6e102690ccfc6fb488899e1510",
+        "feePips": 3000
+      },
+      {
+        "symbol": "NVDA",
+        "address": "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec",
+        "feed": "0x379EC4f7C378F34a1B47E4F3cbeBCbAC3E8E9F15",
+        "pool": "0xd4eb21209c4d6093f80b5b84f5c45cc093ea14a3",
+        "feePips": 500
+      }
+    ]
+  },
+  "operatorDeployment": {
+    "deployer": null,
+    "startingNonce": null,
+    "library": null,
+    "adapter": null,
+    "factory": null,
+    "receipts": [],
+    "status": "replace only from successful receipts; null addresses are deliberate"
+  },
+  "factories": null,
+  "presets": null,
+  "adapters": null,
+  "libraries": null
+}

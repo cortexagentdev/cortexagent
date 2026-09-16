@@ -1,0 +1,5 @@
+{
+  "note": "Hand-curated DEX venue registry, keyed by Stock Token address (lowercase), each value a list of pool addresses to sample for depth. Versioned in git for the same reason as data/classification.json: the set changes rarely and a paid aggregator API would be the only recurring cost in an otherwise free C1 (locked decision 8 puts depth on direct pool reads, never an aggregator).",
+  "empty": "This ships empty. No public DEX venue registry for Robinhood Chain was found on the free tier at survey time, and inventing pool addresses would be worse than sampling none: every asset would carry a depth number nobody measured. While it is empty, Gate 2 samples zero venues, poolDepthUsd is 0 and UNIVERSE_DEPTH_FLOOR_USD defaults to 0 so that a gap in our own data is not billed to the assets as an exclusion. Populate this file and raise the floor together.",
+  "venues": {}
+}

@@ -1,0 +1,64 @@
+# API image. Single stage: the api is Bun-native TypeScript with no compile
+# step, `bun` runs the source directly. Same image serves the HTTP api, the
+# BullMQ worker and the one-shot migrator; only the command differs (OPS-2).
+#
+# Build context MUST be the repo root, not api/:
+#   docker build -f Dockerfile.api -t cortex-api .
+# api imports shared/contracts.ts through the @shared/* alias (api/tsconfig.json),
+# so this build needs both api/ and shared/ in context. A context of ./api
+# cannot see ../shared and fails at type resolution or, worse, at runtime.
+
+FROM oven/bun:1
+WORKDIR /app
+
+# Shared uid/gid across the api and worker containers: they are the same image.
+# oven/bun:1 is Debian (trixie), not Alpine, so this is groupadd/useradd, not
+# the BusyBox addgroup/adduser. Created up front so every COPY below can land
+# owned by cortex directly, rather than a later `chown -R /app`: overlayfs
+# copies up the full content of every file whose metadata changes, so a
+# trailing recursive chown over node_modules nearly doubled this image.
+RUN groupadd --system cortex && useradd --system --gid cortex cortex
+
+# Manifests first, into the same relative position they hold in the repo, so
+# `bun install` is cached across rebuilds that only touch source.
+COPY --chown=cortex:cortex api/package.json api/bun.lock ./api/
+COPY --chown=cortex:cortex shared ./shared
+
+# Installing as cortex, not root: a dev checkout of this repo has api/src,
+# api/data, api/drizzle and api/scripts at 700 (owner-only) on the host, and
+# COPY preserves that mode. --chown above fixes ownership on the way in, so
+# node_modules is created cortex-owned from the start too, and the runtime
+# user never needs write access to anything, having only ever read it.
+#
+# --production skips devDependencies (drizzle-kit, eslint, prettier, etc).
+# Verified nothing under api/src or api/scripts imports any of them: drizzle-kit
+# is only used by api/drizzle.config.ts, a dev-only tool invoked by `db:generate`
+# on a developer machine, never by anything this image runs.
+USER cortex
+RUN cd api && bun install --frozen-lockfile --production
+
+# Now the rest of the source, kept at the same relative position as the repo
+# (api/src, api/data, api/drizzle, api/scripts). This matters beyond tidiness:
+# api/src/db/migrate.ts resolves migrations at
+# `new URL("../../drizzle", import.meta.url)`, i.e. relative to api/src/db/, and
+# several modules (lenses/load.ts, universe/pools.ts, lib/session.ts) load
+# api/data/*.json the same way. Flattening the layout would break both.
+COPY --chown=cortex:cortex api ./api
+
+EXPOSE 3001
+
+# oven/bun:1 has no curl or wget. Bun's built-in fetch does the job without
+# installing anything just for this.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["bun", "-e", "fetch('http://localhost:3001/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+
+# Default command runs the HTTP server. env.ts validates all required env vars
+# at import time and throws if any are missing, so this never bakes a value in
+# here, it only names the entrypoint (global do-not 18).
+#
+# The worker service (OPS-2) overrides this with:
+#   bun api/src/worker.ts
+# The one-shot migrator (OPS-2/OPS-4) overrides this with:
+#   bun api/src/db/migrate.ts
+# Never run migrations from this default entrypoint (global do-not 19).
+CMD ["bun", "api/src/index.ts"]

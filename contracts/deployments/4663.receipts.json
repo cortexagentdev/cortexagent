@@ -1,0 +1,173 @@
+{
+  "network": "Robinhood Chain mainnet",
+  "chainId": 4663,
+  "release": "preset-v6-zero-fee-v1",
+  "deployer": "0xbb0F615a77713Df5C9f686253Ed4B7Bcf500A9ab",
+  "protocolFeeSink": "0xbb0F615a77713Df5C9f686253Ed4B7Bcf500A9ab",
+  "gasUsed": "29523076",
+  "gasCostWei": "2020556356720000",
+  "gasCostEth": "0.002020556356720000",
+  "remainingEth": "0.003001077902561773",
+  "sourceVerification": "2-partial-matches-confirmed-13-unverified-pro-api-http-500",
+  "transactions": [
+    {
+      "nonce": 0,
+      "transactionHash": "0xfb6b75ffee89c69c28d760233b57d1ee44dbd02feb02e129ed369b1de0dda007",
+      "block": "63897185",
+      "gasUsed": "4232591",
+      "effectiveGasPrice": "68732000",
+      "verified": true,
+      "contracts": [
+        {
+          "artifact": "VaultDeployer",
+          "address": "0x1E3A7d310FA0686BF804cF5bA5086b35E8113921",
+          "runtimeHash": "0xc9808f4714e843da0096299d2f291504309f1661f4b2703c6b5bfc2e9a529b42"
+        }
+      ]
+    },
+    {
+      "nonce": 1,
+      "transactionHash": "0xe7fe0788b41e406d667b5a93fd39fe2791d32b3ec9c4520ccdbe664ec54c1ee1",
+      "block": "63897807",
+      "gasUsed": "2423309",
+      "effectiveGasPrice": "67782000",
+      "verified": true,
+      "contracts": [
+        {
+          "artifact": "UniswapV3SwapRouter02Adapter",
+          "address": "0xF9a1297b28116b0C241a0F55ED6ED79514aeF349",
+          "runtimeHash": "0x8cfbd8f96c2e29a22468adda47aa69fc9cb8b2650fe465524ef594f329792e43"
+        }
+      ]
+    },
+    {
+      "nonce": 2,
+      "transactionHash": "0x6d82eb5e1160d87de72e00b7facf61a3787a2ae46ac65a96b79fafbb9b98faf3",
+      "block": "63898238",
+      "gasUsed": "2804748",
+      "effectiveGasPrice": "68166000",
+      "verified": true,
+      "contracts": [
+        {
+          "artifact": "PresetThemeFactory",
+          "address": "0xDA01ee6AF692cf53B8Ec662a95C389bFb64ccb2C",
+          "runtimeHash": "0x50605ad51a2c39b6b8680819d57304faaafcdf32cdbf8dbd6c88c730e082fde8"
+        }
+      ]
+    },
+    {
+      "nonce": 3,
+      "transactionHash": "0xcbf214c37d82c43712845edff8e5561879f909039c59e6bcae4b375375be0de0",
+      "block": "63898716",
+      "gasUsed": "5190760",
+      "effectiveGasPrice": "68006000",
+      "verified": true,
+      "contracts": [
+        {
+          "artifact": "token",
+          "slug": "ai-infrastructure",
+          "address": "0x1892292CC6E492833BB45721E0996EF0423B8D7a",
+          "runtimeHash": "0x20f81ecebf4553ba1ea36d838a274174a3f9e69adc35319ffbc9baa24a0ec198"
+        },
+        {
+          "artifact": "vault",
+          "slug": "ai-infrastructure",
+          "address": "0x527F86FC8F0d0f5f664960Cc7f17d25D8f3EEF50",
+          "runtimeHash": "0x5b5fddd8e0dac47d6cea0df1b656a1a968d44a6f61d1fc18118e519d85ffd959"
+        },
+        {
+          "artifact": "feeController",
+          "slug": "ai-infrastructure",
+          "address": "0xB1940d1E1F03Ec07329676B64CA8C14e349ED28E",
+          "runtimeHash": "0xe4a643511ebcfd7966ebe7c1d6437922cc8081de3933c0bae5371da83c62271d"
+        }
+      ]
+    },
+    {
+      "nonce": 4,
+      "transactionHash": "0x606ebea97950bad06dd35a621a5494b70aceb048e87dbd59bf17cec4b0e63ddd",
+      "block": "63901436",
+      "gasUsed": "5042994",
+      "effectiveGasPrice": "69248000",
+      "verified": true,
+      "contracts": [
+        {
+          "artifact": "token",
+          "slug": "data-centers-and-power",
+          "address": "0x951d33246B78C73031503FFf2d5744776A94317C",
+          "runtimeHash": "0x78c0cedc0f5837005fe87f59f5f4fed18f6060a6ea27eef4b7ce98d0bc5af3f7"
+        },
+        {
+          "artifact": "vault",
+          "slug": "data-centers-and-power",
+          "address": "0x92178a8072Fd38c7290eD7f6675Ae2d5AfFFcc25",
+          "runtimeHash": "0x8b7285d4576d3f9b6014f97935607202afb3ad61be08133e80653f160de362a4"
+        },
+        {
+          "artifact": "feeController",
+          "slug": "data-centers-and-power",
+          "address": "0xeB1d42d2973D7828D34b4886eEc9e9Ec56CaFd78",
+          "runtimeHash": "0x15d21ab9fd44b6f372b6cdd421658e967a5e4bcf741930dfd2bce7fd1c303349"
+        }
+      ]
+    },
+    {
+      "nonce": 5,
+      "transactionHash": "0xb668a755bcb6225966868639e31a8a6829dc62f81c05be565102d378be317480",
+      "block": "63901464",
+      "gasUsed": "4914151",
+      "effectiveGasPrice": "68252000",
+      "verified": true,
+      "contracts": [
+        {
+          "artifact": "token",
+          "slug": "defense",
+          "address": "0x972DcB97e70855D0eb280032b3eBd07742925C66",
+          "runtimeHash": "0xe98dc0a74a8ccae9c62e5079811017a281ecd5ab57485df65f9f2ba824c584d7"
+        },
+        {
+          "artifact": "vault",
+          "slug": "defense",
+          "address": "0x23232C10949203486a4ae2E9e1d04C828e292b82",
+          "runtimeHash": "0x5e105ee42a1b30d15bbfcc551dd359a87b5a2aa397c8394561a0f4f36c14ee12"
+        },
+        {
+          "artifact": "feeController",
+          "slug": "defense",
+          "address": "0xB48f0fD0424Fc2E7448C8825E9648F7056358a5E",
+          "runtimeHash": "0x5547fe9b36250d65a8705d35c14f06fabb34e4b2e0dc96b9892df9acb695198c"
+        }
+      ]
+    },
+    {
+      "nonce": 6,
+      "transactionHash": "0x83effc820d9ab4ffdf56e87ea9ecd420e9826c3312619986e13775775093d4d6",
+      "block": "63901493",
+      "gasUsed": "4914523",
+      "effectiveGasPrice": "68486000",
+      "verified": true,
+      "contracts": [
+        {
+          "artifact": "token",
+          "slug": "rate-cut-beneficiaries",
+          "address": "0xcA013B24f02013a7D348F2b3ae22B5f0B45394aE",
+          "runtimeHash": "0x6b9ccfa67af423274c685ef83e4ee8c325e5fd34482b891d1064fcffa8928e20"
+        },
+        {
+          "artifact": "vault",
+          "slug": "rate-cut-beneficiaries",
+          "address": "0x9F3F00A13026fD0b9494a673aBfaD9bE176FD00E",
+          "runtimeHash": "0xfc8cbb2795e295d4e9e20652374d8464e4962517387f0d527a18aae476c300c9"
+        },
+        {
+          "artifact": "feeController",
+          "slug": "rate-cut-beneficiaries",
+          "address": "0x4D008b204118130D18D5dCE9Aa48F17c25D5fF8a",
+          "runtimeHash": "0x03653260a10c5fcbe8f411af9f413ca685fe70402bbccb338e7b773e984b42d7"
+        }
+      ]
+    }
+  ],
+  "sourceVerificationBlocker": "Authenticated PRO API status reads succeed. Source verification POST requests return HTTP 500 on both RPC routes and the REST standard-input route.",
+  "registrationVerified": true
+}

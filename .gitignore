@@ -1,0 +1,72 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+.output
+.vinxi
+.tanstack/**
+.nitro
+.vercel/
+*.local
+spec
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.claude
+AGENTS.md
+CLAUDE.md
+
+# Env files. Never commit real values.
+.env
+.env.*
+!.env.example
+
+# Foundry build artifacts (contracts/, BE-25a)
+contracts/out
+contracts/cache
+contracts/broadcast
+
+# Local Anvil chain (scripts/local-chain.sh). Both are regenerated on every run
+# and describe a throwaway chain: constituents.json is a snapshot of the live
+# universe table, and the deployment record points at addresses that exist only
+# until the next `local-chain.sh down`.
+contracts/script/local/constituents.json
+contracts/deployments/local-46630.json
+contracts/script/local/.holders.psv
+contracts/script/local/.chain-mode
+contracts/script/local/.balances.psv
+contracts/script/local/.transfers.psv
+contracts/script/local/.wired-deployment
+contracts/script/local/backup-*.dump
+# Runtime generation manifests are local state, not public mainnet address records.
+contracts/deployments/local-execution-manifest.json
+contracts/deployments/local-execution-manifest.json.tmp
+contracts/deployments/local-execution-manifest.json.presets-plan.json
+
+# Mainnet handoff output is unsigned operator material. Keep it outside Git
+# even when an operator chooses a repository-local scratch directory.
+.mainnet-handoff/
+
+# Local deployment state and public-export bookkeeping.
+runtime/
+.cortex-sync-manifest.json

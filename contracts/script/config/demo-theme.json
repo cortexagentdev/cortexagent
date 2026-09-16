@@ -1,0 +1,24 @@
+{
+  "_comment": "Demo theme for RHC testnet 46630. Replace every 0x00..00 placeholder with a real testnet address before broadcasting. constituents must each have a Chainlink AggregatorV3 feed (the 35-name universe); feeds is parallel to constituents; targetWeightsBps must sum to 10000; capsBps[i] >= targetWeightsBps[i]; creatorFeeBps <= 100; mintRedeemBandBps must exceed 50 + creatorFeeBps.",
+  "slug": "cortex-demo",
+  "name": "Cortex Demo Theme",
+  "symbol": "ctxDEMO",
+  "decimals": 18,
+  "creator": "0x0000000000000000000000000000000000000000",
+  "usdg": "0x0000000000000000000000000000000000000000",
+  "constituents": [
+    "0x0000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000"
+  ],
+  "feeds": [
+    "0x0000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000"
+  ],
+  "targetWeightsBps": [6000, 4000],
+  "capsBps": [8000, 8000],
+  "creatorFeeBps": 20,
+  "mintRedeemBandBps": 80,
+  "slippageCapBps": 100,
+  "maxRedeemUsd": "1000000000000000000000000",
+  "allowedVenues": ["0x0000000000000000000000000000000000000000"]
+}

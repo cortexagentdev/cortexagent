@@ -1,0 +1,35 @@
+{
+  "status": "historical-single-theme-template-do-not-use-for-presets",
+  "chainId": 4663,
+  "release": "static-v5-zero-fee-v1",
+  "slug": "operator-selected-slug",
+  "name": "Operator-selected theme name",
+  "symbol": "OPERATOR",
+  "decimals": 18,
+  "creator": null,
+  "usdg": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+  "constituents": [
+    "0xaf3d76f1834a1d425780943c99ea8a608f8a93f9",
+    "0xe93237c50d904957cf27e7b1133b510c669c2e74",
+    "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec"
+  ],
+  "feeds": [
+    "0x6B22A786bAa607d76728168703a39Ea9C99f2cD0",
+    "0x45C3C877C15E6BA2EBB19eA114Ea508d14C1Af2E",
+    "0x379EC4f7C378F34a1B47E4F3cbeBCbAC3E8E9F15"
+  ],
+  "targetWeightsBps": [3333, 3333, 3334],
+  "capsBps": [5000, 5000, 5000],
+  "creatorFeeBps": 0,
+  "mintRedeemBandBps": 60,
+  "slippageCapBps": 60,
+  "maxRedeemUsd": "10000000000000000000000",
+  "allowedVenues": null,
+  "notes": [
+    "Historical only. Current preset-v6 deployment uses bootstrap-presets.ts --prepare and DeployPresets.s.sol; do not fill this single-theme template for the fixed catalog.",
+    "Fill creator and allowedVenues from the reviewed operator deployment package; creator must be the transaction sender.",
+    "Rebalancing is absent on every chain in this release; deposits and exits remain available.",
+    "Do not replace addresses with a research quote, local Anvil address, or invented zero address.",
+    "The zero creator fee is intentional; FeeController is recorded accounting and has no payout path."
+  ]
+}
