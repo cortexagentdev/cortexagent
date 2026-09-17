@@ -28,12 +28,14 @@
   },
   "dependencies": {
     "@hono/trpc-server": "^0.4.2",
+    "@resvg/resvg-js": "^2.6.2",
     "@trpc/server": "^11.18.0",
     "bullmq": "^6.1.2",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.13.2",
     "ioredis": "^6.0.0",
     "postgres": "^3.4.9",
+    "satori": "^0.33.4",
     "superjson": "^2.2.6",
     "viem": "^2.55.16",
     "zod": "^4.4.3"

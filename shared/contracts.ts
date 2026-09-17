@@ -190,3 +190,55 @@ export interface VaultSummary {
   /** Whether the displayed state came from the chain or the indexed fallback. */
   source: "chain" | "indexed";
 }
+
+/* --- Shareable Research Cards ---------------------------------------------
+   A card is a citable snapshot of one piece of Cortex research, built to leave
+   the terminal: a group chat, a timeline, a README. Signals, asset-quality
+   reads and lenses project into the same shape, so the renderer never learns
+   what a subject is and a new card costs a projection rather than a layout. */
+
+export type ResearchCardKind = "signal" | "asset" | "lens";
+
+/** One labelled figure on a card. `value` arrives display-ready, because the
+ *  card is rendered to a PNG by a service with none of the UI's formatters, and
+ *  the two must not drift into formatting a number differently. */
+export interface ResearchCardStat {
+  label: string;
+  value: string;
+  /** Figures that should line up in the mono face, as they do in the terminal. */
+  mono: boolean;
+}
+
+export interface ResearchCardSnapshot {
+  kind: ResearchCardKind;
+  /** Canonical and stable. For a signal, the signal's own deterministic id; for
+   *  an asset, its lower-case token address; for a lens, its slug. */
+  id: string;
+  /** Path of the public card page, origin-relative so either host can serve it. */
+  path: string;
+  headline: string;
+  /** The plain-language read from the signal, asset-quality, or lens projection. */
+  summary: string;
+  /** Brand hex the card is keyed to, taken from the subject's own colour. */
+  accent: string;
+  /** Short qualifier, e.g. a confidence grade. Null when the subject has none. */
+  badge: string | null;
+  stats: ResearchCardStat[];
+  /** The one-line proof under the figures: what was observed against what was
+   *  expected, and over which blocks. Too long to survive a stat tile without
+   *  wrapping, and too central to the claim to leave off the image. Null when
+   *  the subject has no such reading. */
+  evidenceLine: string | null;
+  /** Tx hashes, feed round ids, pool addresses. Empty is a fact, not a gap. */
+  sources: string[];
+  /** When the underlying research was computed. The card's "as of". */
+  asOf: string;
+  /** When this document was produced. Differs from `asOf` for a live subject. */
+  generatedAt: string;
+  /** True when the subject can never change again, so the card is a permanent
+   *  record; false when it is a reading of something still moving. */
+  immutable: boolean;
+  /** What this card could not establish, named rather than rendered as a zero.
+   *  Empty means everything above was read successfully. */
+  unavailable: string[];
+}

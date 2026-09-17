@@ -8,8 +8,10 @@ import {
   cachedRpcCapabilities,
   defaultRpcCapabilityTargets,
   readRpcHead,
+  readRpcHeadsAtCommonHeight,
   refreshRpcCapabilities,
   type RpcHead,
+  type RpcHeadReading,
 } from "../chain/rpc-capabilities.ts";
 import { loadRpcMetricsSnapshots, rpcHost } from "../chain/rpc-metrics.ts";
 import { logger } from "../lib/logger.ts";
@@ -49,15 +51,21 @@ async function monitorHeads(
 ) {
   if (!urls.length)
     return { status: "unconfigured" as const, heads: [], reasons: ["unconfigured"] };
+  const readings: RpcHeadReading[] = [];
   const heads: RpcHead[] = [];
   const failures: string[] = [];
   for (const url of urls) {
     try {
-      heads.push(await readRpcHead(url));
+      const head = await readRpcHead(url);
+      readings.push({ url, head });
+      heads.push(head);
     } catch {
       failures.push(new URL(url).host);
     }
   }
+  const common = await readRpcHeadsAtCommonHeight(readings);
+  const allCommonHeadsAvailable = common.readings.length === readings.length;
+  const consistentHeads = common.readings.map((reading) => reading.head);
   const stateKey = `${context}:${urls.map((url) => new URL(url).host).join(",")}`;
   const now = Date.now();
   const highest = heads.reduce<RpcHead | null>(
@@ -65,7 +73,12 @@ async function monitorHeads(
     null,
   );
   const state = headState.get(stateKey);
-  if (highest && (!state || highest.number > state.block || highest.hash !== state.hash)) {
+  if (
+    highest &&
+    (!state ||
+      highest.number > state.block ||
+      (highest.number === state.block && highest.hash !== state.hash))
+  ) {
     headState.set(stateKey, {
       block: highest.number,
       hash: highest.hash,
@@ -75,10 +88,12 @@ async function monitorHeads(
   }
   const current = headState.get(stateKey);
   const disagreement =
-    new Set(heads.map((head) => `${head.number}:${head.hash ?? "unknown"}`)).size > 1;
+    allCommonHeadsAvailable &&
+    new Set(consistentHeads.map((head) => `${head.number}:${head.hash}`)).size > 1;
+  const failedHosts = [...new Set([...failures, ...common.failedHosts])];
   const stalled = Boolean(current && now - current.lastProgressAt > env.RPC_STALLED_HEAD_MS);
   const reasons = [
-    ...(failures.length ? [`provider outage: ${failures.join(", ")}`] : []),
+    ...(failedHosts.length ? [`provider outage: ${failedHosts.join(", ")}`] : []),
     ...(disagreement ? ["provider disagreement"] : []),
     ...(stalled ? [`head stalled for over ${env.RPC_STALLED_HEAD_MS}ms`] : []),
     ...(heads.some((head) => head.number < 0 || (head.timestamp ?? 0) <= 0)

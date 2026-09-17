@@ -1,7 +1,5 @@
 # Cortex API
 
-[Web](https://cortexagent.tech) • [X](https://x.com/cortex_rh) • [Telegram](https://x.com/cortex_rh)
-
 Backend and smart contracts for researching tokenized equities and interacting with shared thematic vaults on Robinhood Chain.
 
 The API serves asset data, signals, thematic baskets, portfolio reads, and unsigned transaction plans. Background workers ingest market and chain data, compute signals, evaluate alerts, and index vault activity. Users sign and submit transactions with their own wallets; the API and workers do not hold deployment or user signing keys.
@@ -212,3 +210,11 @@ docker build -f Dockerfile.api -t cortex-api .
 The same image runs the API (`bun api/src/index.ts`), worker (`bun api/src/worker.ts`), or one-shot migrator (`bun api/src/db/migrate.ts`). Supply runtime environment variables and mount the execution manifest read-only at `EXECUTION_MANIFEST_PATH`; the image does not include contract deployment files.
 
 Run PostgreSQL and Redis on a private network with persistent storage. Back up the database, run migrations once before starting API and worker processes, and serve the API behind HTTPS. Configure the proxy to replace client IP headers used for rate limiting. Monitor `/ops/health`, execution indexer lag, and both process logs.
+
+## Security and license
+
+No independent security audit is recorded. Deployment receipt/runtime verification is separate from explorer source verification; the timestamped [verification record](contracts/deployments/4663.verification.json) tracks the latter. Issuer restrictions, oracle failures, and insufficient liquidity can prevent routed actions or delay withdrawals.
+
+Keep session secrets, provider credentials, and signing keys out of source control. Deploy contracts only from separate operator tooling with a hardware wallet or encrypted keystore.
+
+No project-wide license is currently included. Dependency licenses remain under `contracts/lib/`; they do not license the rest of this repository.

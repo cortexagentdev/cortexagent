@@ -3,6 +3,10 @@ import { Hono } from "hono";
 import { apiCors } from "./http/cors.ts";
 
 import { MAINNET_LOGS_RPC_URLS, MAINNET_RPC_URLS, rpcHost } from "./chain/client.ts";
+import {
+  defaultRpcCapabilityTargets,
+  startRpcCapabilityRefresh,
+} from "./chain/rpc-capabilities.ts";
 import { withRpcScope } from "./chain/rpc-metrics.ts";
 import { closeDb, db } from "./db/client.ts";
 import { env, isDevelopment } from "./env.ts";
@@ -24,6 +28,8 @@ import {
   registryStatus,
   seedVerifiedVenues,
 } from "./execution/registry.ts";
+import { publicStats } from "./http/public-stats.ts";
+import { researchCards } from "./http/research-cards.ts";
 import { indexerStatus } from "./workers/vault-indexer.ts";
 import { syncPresetRecords } from "./execution/preset-registry-store.ts";
 import { operationalHealth } from "./ops/health.ts";
@@ -180,6 +186,20 @@ app.get("/admin/unclassified", async (c) => {
   }
 });
 
+// --- Public stats -----------------------------------------------------------
+// `/api/stats.json` and `/badge/*.svg`: the same overview reading the terminal
+// renders, published keyless for anyone to read, chart or embed. It carries its
+// own CORS and its own rate-limit bucket, so a hot badge cannot spend the
+// terminal's budget.
+app.route("/", publicStats);
+
+// --- Shareable Research Cards -----------------------------------------------
+// `/api/card/*.json` and `/card/*.png`: one signal, asset-quality read, or lens as a citable
+// snapshot plus the Open Graph image a chat client unfurls. Public and keyless
+// like the badges, on its own rate-limit bucket because rendering costs more
+// than reading a number.
+app.route("/", researchCards);
+
 // --- tRPC -------------------------------------------------------------------
 app.use(
   "/trpc/*",
@@ -220,6 +240,13 @@ logger.info("cortex-api listening", {
   logsRpcEndpoints: MAINNET_LOGS_RPC_URLS.map(rpcHost),
 });
 
+// Quotes check execution RPC capabilities on every request. Probing them in the
+// background keeps that check a cache read instead of a minute-long cold probe.
+const executionTargets = defaultRpcCapabilityTargets().execution;
+const stopCapabilityRefresh = env.EXECUTION_MODE
+  ? startRpcCapabilityRefresh("execution", executionTargets.urls, executionTargets.chainId)
+  : () => undefined;
+
 // Report the classification gap once at startup. Non-blocking: an empty or
 // unreachable universe table just means there is nothing to report yet.
 void logUnclassifiedAssets(db);
@@ -227,6 +254,7 @@ void logUnclassifiedAssets(db);
 installShutdownHandlers([
   // stop(false) closes the listener but lets in-flight requests finish.
   { name: "http", run: async () => void (await server.stop(false)) },
+  { name: "rpc-capability-refresh", run: async () => stopCapabilityRefresh() },
   { name: "queues", run: closeQueues },
   { name: "queue-connection", run: closeQueueConnection },
   { name: "redis", run: closeRedis },

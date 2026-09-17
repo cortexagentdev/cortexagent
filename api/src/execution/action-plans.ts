@@ -23,7 +23,9 @@ import { matchesRegisteredPreset } from "./preset-manifest.ts";
 
 const BPS = 10_000n;
 const QUOTE_TTL_MS = 20_000;
-const MAX_QUOTE_BLOCK_DISTANCE = 5n;
+// Fast chains can advance many blocks during one RPC round trip. Compare
+// chain timestamps so freshness is bounded without assuming a block cadence.
+const MAX_QUOTE_SNAPSHOT_AGE_SECONDS = BigInt(QUOTE_TTL_MS / 1_000);
 const DEADLINE_SECONDS = 120n;
 const MAX_SLIPPAGE_BPS = 1_000;
 const UINT256_MAX = (1n << 256n) - 1n;
@@ -100,6 +102,25 @@ const quoteFlights = new Map<string, Promise<ActionQuote | ActionPlan | ActionRe
 
 function refusal(code: string, message: string, temporary = false): ActionRefusal {
   return { status: temporary ? "temporarily_unavailable" : "refused", code, message };
+}
+
+function isRecentSnapshot(
+  snapshot: { number: bigint | null; timestamp: bigint | null },
+  latest: { number: bigint | null; timestamp: bigint | null },
+): boolean {
+  if (
+    snapshot.number === null ||
+    snapshot.timestamp === null ||
+    latest.number === null ||
+    latest.timestamp === null
+  )
+    return false;
+  const ageSeconds = latest.timestamp - snapshot.timestamp;
+  return (
+    latest.number >= snapshot.number &&
+    ageSeconds >= 0n &&
+    ageSeconds <= MAX_QUOTE_SNAPSHOT_AGE_SECONDS
+  );
 }
 
 /** Decimal strings only: no float round-trip, exponent, sign, or excess precision. */
@@ -270,7 +291,6 @@ async function build(
   requireSimulation: boolean,
   reviewed?: CachedQuote,
 ): Promise<ActionQuote | ActionPlan | ActionRefusal> {
-  const started = Date.now();
   if (request.denomination !== expectedDenomination(request.action))
     return refusal(
       "INVALID_DENOMINATION",
@@ -359,18 +379,20 @@ async function build(
   const block = await context.publicClient.getBlock();
   if (!block.number || !block.hash)
     return refusal("RPC_UNAVAILABLE", "The execution node did not return a canonical block.", true);
+  // Cold provider/identity checks precede the snapshot and must not consume its TTL.
+  const snapshotStarted = Date.now();
   const deadline = routed ? block.timestamp + DEADLINE_SECONDS : null;
-  const expiresAt = reviewed?.quote.expiresAt ?? new Date(started + QUOTE_TTL_MS).toISOString();
+  const expiresAt =
+    reviewed?.quote.expiresAt ?? new Date(snapshotStarted + QUOTE_TTL_MS).toISOString();
   async function snapshotCurrent() {
-    const [canonical, head] = await Promise.all([
+    const [canonical, latest] = await Promise.all([
       context.publicClient.getBlock({ blockNumber: block.number! }),
-      context.publicClient.getBlockNumber({ cacheTime: 0 }),
+      context.publicClient.getBlock(),
     ]);
     return (
       Date.now() < Date.parse(expiresAt) &&
       canonical.hash === block.hash &&
-      head >= block.number! &&
-      head <= block.number! + MAX_QUOTE_BLOCK_DISTANCE
+      isRecentSnapshot(block, latest)
     );
   }
   let approvals: ApprovalStep[] = [];
@@ -656,15 +678,11 @@ export async function planVaultAction(quoteId: string, caller: Address) {
       "DEPLOYMENT_MISMATCH",
       "Execution identity changed since this quote. Request a fresh quote.",
     );
-  const [head, original] = await Promise.all([
-    context.publicClient.getBlockNumber({ cacheTime: 0 }),
+  const [latest, original] = await Promise.all([
+    context.publicClient.getBlock(),
     context.publicClient.getBlock({ blockNumber: BigInt(cached.quote.blockNumber) }),
   ]);
-  if (
-    original.hash !== cached.quote.blockHash ||
-    head < BigInt(cached.quote.blockNumber) ||
-    head > BigInt(cached.quote.blockNumber) + MAX_QUOTE_BLOCK_DISTANCE
-  )
+  if (original.hash !== cached.quote.blockHash || !isRecentSnapshot(original, latest))
     return refusal(
       "QUOTE_EXPIRED",
       "The quote snapshot is no longer canonical or recent. Request a fresh quote.",

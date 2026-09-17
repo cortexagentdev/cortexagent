@@ -481,7 +481,7 @@ async function verifyExecution(
   const { manifest, digest } = parsed;
   let publicClient: PublicClient;
   let logsClient: PublicClient;
-  let walletVerification: ExecutionReadiness["walletVerification"] = null;
+  let walletVerification: ExecutionReadiness["walletVerification"];
   try {
     const chain = defineChain({
       id: manifest.chainId,
