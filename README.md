@@ -1,3 +1,5 @@
+# Cortex - $CTX 0xec01732037c52afa1629f120a7ff7a2ff9c16bf0
+
 # Cortex API
 
 Backend and smart contracts for researching tokenized equities and interacting with shared thematic vaults on Robinhood Chain.
