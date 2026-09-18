@@ -15,9 +15,16 @@ import {
 } from "drizzle-orm";
 import { z } from "zod";
 
-import type { Signal, SignalKind } from "@shared/contracts.ts";
+import type { Signal, SignalKind, SignalTimeline, SignalTimelineEvent } from "@shared/contracts.ts";
 
 import { signals, type SignalRecord } from "../db/schema.ts";
+import {
+  cachedRead,
+  isSignalTimeline,
+  loadTimeline,
+  rangeStart,
+  timelineCacheKey,
+} from "../signals/timeline.ts";
 import { publicProcedure, router } from "../trpc.ts";
 
 const TOKEN_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
@@ -64,6 +71,61 @@ const feedInput = z
   .optional();
 
 const byIdInput = z.object({ id: z.string().trim().min(1) }).strict();
+
+// The canonical universe symbol, matched exactly so the (ticker, ts) index is
+// used. The asset page passes `asset.symbol`, which is what the computer writes.
+const tickerInput = z.string().trim().min(1).max(20);
+
+const timelineInput = z.object({ ticker: tickerInput }).strict();
+
+const HISTORY_DEFAULT_LIMIT = 20;
+const HISTORY_MAX_LIMIT = 50;
+
+const historyInput = z
+  .object({
+    ticker: tickerInput,
+    range: z.enum(["30d", "90d"]),
+    kinds: z.array(z.enum(SIGNAL_KINDS)).min(1).optional(),
+    confidence: z
+      .array(z.enum(["HIGH", "MED", "LOW"]))
+      .min(1)
+      .optional(),
+    cursor: z.string().min(1).optional(),
+    // Injected by `useInfiniteQuery`, see `feedInput`.
+    direction: z.enum(["forward", "backward"]).optional(),
+    limit: z.number().int().positive().max(HISTORY_MAX_LIMIT).optional(),
+  })
+  .strict();
+
+/** History pages newest-first on `(ts, id)`: rank is a feed concern, time is this one's. */
+const historyCursorSchema = z
+  .object({ ts: z.iso.datetime({ offset: true }), id: z.string().min(1) })
+  .strict();
+
+function encodeHistoryCursor(row: { ts: Date; id: string }): string {
+  const payload: z.infer<typeof historyCursorSchema> = { ts: row.ts.toISOString(), id: row.id };
+  return Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+}
+
+function decodeHistoryCursor(raw: string): z.infer<typeof historyCursorSchema> {
+  try {
+    const json: unknown = JSON.parse(Buffer.from(raw, "base64url").toString("utf8"));
+    return historyCursorSchema.parse(json);
+  } catch {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid history cursor" });
+  }
+}
+
+interface HistoryPage {
+  events: SignalTimelineEvent[];
+  nextCursor: string | null;
+}
+
+function isHistoryPage(value: unknown): value is HistoryPage {
+  if (typeof value !== "object" || value === null) return false;
+  const c = value as Record<string, unknown>;
+  return Array.isArray(c.events) && (c.nextCursor === null || typeof c.nextCursor === "string");
+}
 
 /**
  * The keyset cursor. It encodes the sort key of the last row of the previous
@@ -236,4 +298,78 @@ export const signalRouter = router({
 
     return toSignal(record);
   }),
+
+  /**
+   * 90 days of one ticker's signals as day x kind buckets plus the pattern read
+   * per range. Bounded (at most 540 buckets) and cached per ticker for 60s.
+   */
+  timeline: publicProcedure
+    .input(timelineInput)
+    .query(({ ctx, input }): Promise<SignalTimeline> =>
+      cachedRead(ctx, timelineCacheKey("tl", input.ticker), isSignalTimeline, () =>
+        loadTimeline(ctx, input.ticker),
+      ),
+    ),
+
+  /**
+   * One ticker's signals in the range, superseded rows included, newest first.
+   * Keyset paged on `(ts, id)`. Only the first page is cached: it is the one
+   * every asset page view asks for.
+   */
+  history: publicProcedure
+    .input(historyInput)
+    .query(async ({ ctx, input }): Promise<HistoryPage> => {
+      const limit = input.limit ?? HISTORY_DEFAULT_LIMIT;
+
+      const load = async (): Promise<HistoryPage> => {
+        const conditions: SQL[] = [
+          eq(signals.ticker, input.ticker),
+          gte(signals.ts, rangeStart(input.range)),
+        ];
+        if (input.kinds) conditions.push(inArray(signals.kind, input.kinds));
+        if (input.confidence) conditions.push(inArray(signals.confidence, input.confidence));
+        if (input.cursor) {
+          const cursor = decodeHistoryCursor(input.cursor);
+          const ts = new Date(cursor.ts);
+          const keyset = or(lt(signals.ts, ts), and(eq(signals.ts, ts), lt(signals.id, cursor.id)));
+          if (keyset) conditions.push(keyset);
+        }
+
+        const rows = await ctx.db
+          .select({
+            id: signals.id,
+            ts: signals.ts,
+            kind: signals.kind,
+            zScore: signals.zScore,
+            confidence: signals.confidence,
+            window: signals.window,
+            evidence: signals.evidence,
+            supersededBy: signals.supersededBy,
+            source: sql<string | null>`${signals.sources}->>0`,
+          })
+          .from(signals)
+          .where(and(...conditions))
+          .orderBy(desc(signals.ts), desc(signals.id))
+          .limit(limit + 1);
+
+        const hasMore = rows.length > limit;
+        const page = hasMore ? rows.slice(0, limit) : rows;
+        const last = page.at(-1);
+        return {
+          events: page.map((r) => ({ ...r, ts: r.ts.toISOString() })),
+          nextCursor: hasMore && last ? encodeHistoryCursor(last) : null,
+        };
+      };
+
+      if (input.cursor) return load();
+      const key = timelineCacheKey(
+        "h",
+        input.ticker,
+        input.range,
+        [...(input.kinds ?? [])].sort().join(",") || "*",
+        [...(input.confidence ?? [])].sort().join(",") || "*",
+        String(limit),
+      );
+      return cachedRead(ctx, key, isHistoryPage, load);
+    }),
 });

@@ -177,6 +177,48 @@ export type DataQualityFlag =
   | "HALTED"                        // trading halt
   | "NOT_SIGNAL_ELIGIBLE";          // excluded from signals, see ineligibleReasons
 
+export type SignalTimelineRange = "30d" | "90d";
+
+/** What a kind's history on one ticker reads as. Several can apply at once. */
+export type SignalPatternLabel = "NEW" | "RECURRING" | "ISOLATED" | "MOSTLY_LOW";
+
+/** One UTC day of one kind on one ticker. Superseded rows count: this is history. */
+export interface SignalTimelineDay {
+  day: string;                      // YYYY-MM-DD, UTC
+  kind: SignalKind;
+  count: number;
+  maxAbsZ: number;
+  high: number;
+  med: number;
+  low: number;
+}
+
+export interface SignalKindPattern {
+  kind: SignalKind;
+  count: number;
+  activeDays: number;
+  firstTs: string;
+  lastTs: string;
+  lowShare: number;                 // 0..1, LOW-confidence rows over all rows
+  labels: SignalPatternLabel[];
+}
+
+/** `signalRouter.timeline()`: always the full 90 days, so the 30d view is a
+ *  client-side slice and switching ranges costs no request. */
+export interface SignalTimeline {
+  ticker: string;
+  generatedAt: string;
+  historySince: string | null;      // oldest stored signal on any ticker
+  days: SignalTimelineDay[];        // oldest first
+  patterns: Record<SignalTimelineRange, SignalKindPattern[]>;
+}
+
+/** One row of `signalRouter.history()`. The full signal is one click away. */
+export type SignalTimelineEvent = Pick<
+  Signal,
+  "id" | "ts" | "kind" | "zScore" | "confidence" | "window" | "evidence" | "supersededBy"
+> & { source: string | null };
+
 /** The slice of a signal the Radar shows. The full row is one click away. */
 export type RadarSignal = Pick<
   Signal,
