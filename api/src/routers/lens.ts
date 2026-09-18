@@ -1,12 +1,13 @@
 import { TRPCError } from "@trpc/server";
-import { desc, inArray, sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import type { LensDetail, LensMember, LensSummary } from "@shared/contracts.ts";
 
-import { lensMetrics, universe } from "../db/schema.ts";
+import { universe } from "../db/schema.ts";
 import { deployedTokenIdFor } from "../execution/shared-lens-registry.ts";
 import { classificationBySymbol, loadLenses, type LensDefinition } from "../lenses/load.ts";
+import { latestMetricsByTheme, toSeries, type LatestMetric } from "../lenses/metrics.ts";
 import { logger } from "../lib/logger.ts";
 import { publicProcedure, router, type Context } from "../trpc.ts";
 
@@ -21,52 +22,6 @@ const BY_THEME_CACHE_PREFIX = "lens:byTheme:v1";
 const CACHE_TTL_SEC = 30;
 
 const byThemeInput = z.object({ slug: z.string().trim().min(1) }).strict();
-
-/**
- * The columns `themes()` and `byTheme()` read from the newest `lens_metrics`
- * row for a lens. `movePct` / `netFlowUsd` are stored `null` when uncomputable
- * (BE-19: "null is not zero"); the contract projection is a plain `number`, so
- * they are coalesced to `0` at this boundary and the empty `series` is what
- * signals "not computable" to the UI (W-5).
- */
-type LatestMetric = Pick<
-  typeof lensMetrics.$inferSelect,
-  "theme" | "movePct" | "netFlowUsd" | "signalCount24h" | "series"
->;
-
-/**
- * Newest `lens_metrics` row per requested theme. `DISTINCT ON (theme)` with
- * `ORDER BY theme, ts DESC` is a single backwards scan of
- * `lens_metrics_theme_ts_idx (theme, ts DESC)`: one row per theme, the latest
- * cycle. A lens with no row yet is simply absent from the map.
- */
-async function latestMetricsByTheme(
-  ctx: Context,
-  slugs: string[],
-): Promise<Map<string, LatestMetric>> {
-  if (slugs.length === 0) return new Map();
-
-  const rows = await ctx.db
-    .selectDistinctOn([lensMetrics.theme], {
-      theme: lensMetrics.theme,
-      movePct: lensMetrics.movePct,
-      netFlowUsd: lensMetrics.netFlowUsd,
-      signalCount24h: lensMetrics.signalCount24h,
-      series: lensMetrics.series,
-    })
-    .from(lensMetrics)
-    .where(inArray(lensMetrics.theme, slugs))
-    .orderBy(lensMetrics.theme, desc(lensMetrics.ts));
-
-  return new Map(rows.map((row) => [row.theme, row]));
-}
-
-/** Drop the `null` points a member contributes when it is unpriceable at an
- *  instant. An all-null (or missing) series collapses to `[]`, which the UI
- *  reads as "this lens is not computable right now". */
-function toSeries(raw: (number | null)[] | null | undefined): number[] {
-  return (raw ?? []).filter((point): point is number => point !== null);
-}
 
 function toLensSummary(lens: LensDefinition, metric: LatestMetric | undefined): LensSummary {
   return {

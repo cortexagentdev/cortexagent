@@ -4,7 +4,9 @@ import { z } from "zod";
 
 import type { AlertFire, AlertRule, SignalKind } from "@shared/contracts.ts";
 
-import { alertFires, alerts, signals, universe } from "../db/schema.ts";
+import { loadFires } from "../alerts/fires.ts";
+import { alertFires, alerts, universe } from "../db/schema.ts";
+import { invalidateRadar } from "../radar/cache.ts";
 import { protectedProcedure, router, type Context } from "../trpc.ts";
 
 /**
@@ -203,6 +205,7 @@ export const alertRouter = router({
         });
       }
 
+      await invalidateRadar(ctx, ctx.session.address);
       return toAlertRule({ ...created, fires: 0, lastFiredAt: null });
     }),
 
@@ -220,6 +223,7 @@ export const alertRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Alert rule not found" });
       }
 
+      await invalidateRadar(ctx, ctx.session.address);
       const rule = await loadRule(ctx, ctx.session.address, input.id);
       if (!rule) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Alert rule not found" });
@@ -239,6 +243,7 @@ export const alertRouter = router({
       if (!deleted) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Alert rule not found" });
       }
+      await invalidateRadar(ctx, ctx.session.address);
       return { ok: true };
     }),
 
@@ -266,6 +271,7 @@ export const alertRouter = router({
           ),
         );
 
+      await invalidateRadar(ctx, ctx.session.address);
       return { ok: true };
     }),
 
@@ -306,28 +312,7 @@ export const alertRouter = router({
       const address = ctx.session.address;
       const limit = input?.limit ?? DEFAULT_FIRES_LIMIT;
 
-      const rows = await ctx.db
-        .select({
-          id: alertFires.id,
-          alertId: alertFires.alertId,
-          signalId: alertFires.signalId,
-          ts: alertFires.ts,
-          seenAt: alertFires.seenAt,
-          ruleKind: alerts.kind,
-          ruleTicker: alerts.ticker,
-          ruleThreshold: alerts.threshold,
-          signalTicker: signals.ticker,
-          signalKind: signals.kind,
-          signalZScore: signals.zScore,
-          signalExplanation: signals.explanation,
-          signalConfidence: signals.confidence,
-        })
-        .from(alertFires)
-        .innerJoin(alerts, eq(alerts.id, alertFires.alertId))
-        .leftJoin(signals, eq(signals.id, alertFires.signalId))
-        .where(eq(alerts.userId, address))
-        .orderBy(desc(alertFires.ts))
-        .limit(limit);
+      const fires = await loadFires(ctx, address, { limit });
 
       const [ruleTally] = await ctx.db
         .select({ activeRules: sql<number>`count(*) filter (where ${alerts.active})` })
@@ -342,33 +327,6 @@ export const alertRouter = router({
         .from(alertFires)
         .innerJoin(alerts, eq(alerts.id, alertFires.alertId))
         .where(eq(alerts.userId, address));
-
-      const fires: AlertFire[] = rows.map((row) => ({
-        id: row.id,
-        alertId: row.alertId,
-        signalId: row.signalId,
-        ts: row.ts.toISOString(),
-        seenAt: row.seenAt ? row.seenAt.toISOString() : null,
-        rule: {
-          kind: row.ruleKind,
-          ticker: row.ruleTicker,
-          threshold: row.ruleThreshold,
-        },
-        signal:
-          row.signalTicker !== null &&
-          row.signalKind !== null &&
-          row.signalZScore !== null &&
-          row.signalExplanation !== null &&
-          row.signalConfidence !== null
-            ? {
-                ticker: row.signalTicker,
-                kind: row.signalKind,
-                zScore: row.signalZScore,
-                explanation: row.signalExplanation,
-                confidence: row.signalConfidence,
-              }
-            : null,
-      }));
 
       return {
         fires,

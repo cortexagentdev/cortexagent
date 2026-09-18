@@ -163,6 +163,67 @@ export interface AlertFire {
   } | null;
 }
 
+/**
+ * A data-quality problem on one watched asset, derived server-side from the
+ * universe row so the Radar only renders it. Never a trading signal.
+ */
+export type DataQualityFlag =
+  | "UNPRICED"                      // no usable price right now
+  | "NO_FEED"                       // no Chainlink feed; price is quote/DEX only
+  | "STALE_FEED"                    // feed older than its liveness bound
+  | "FEED_QUOTE_DISAGREE"           // feed and venue quote disagree
+  | "MULTIPLIER_MISMATCH"           // token multiplier != registry multiplier
+  | "PAUSED"                        // oracle or token paused
+  | "HALTED"                        // trading halt
+  | "NOT_SIGNAL_ELIGIBLE";          // excluded from signals, see ineligibleReasons
+
+/** The slice of a signal the Radar shows. The full row is one click away. */
+export type RadarSignal = Pick<
+  Signal,
+  "id" | "ts" | "ticker" | "kind" | "zScore" | "confidence" | "explanation"
+>;
+
+export interface RadarAsset {
+  symbol: string;
+  name: string;
+  tokenAddress: `0x${string}`;
+  priceUsd: number | null;
+  change24hPct: number | null;
+  feedAgeSec: number | null;
+  spark: number[];
+  flags: DataQualityFlag[];
+  ineligibleReasons: string[];
+  signalCount24h: number;
+  latestSignal: RadarSignal | null;
+}
+
+export interface RadarLens {
+  slug: string;
+  name: string;
+  color: string;
+  movePct: number | null;           // null when not computable. NEVER 0 as a stand-in
+  netFlowUsd: number | null;
+  memberCount: number;
+  signalCount24h: number;
+  series: number[];
+  computedAt: string | null;
+}
+
+/** `watchlistRouter.radar()`: one wallet's research screen, composed server-side. */
+export interface MarketRadar {
+  asOf: {
+    generatedAt: string;            // when this reading was taken, not when served
+    universeRefreshedAt: string | null;
+    latestSignalTs: string | null;
+    lensComputedAt: string | null;
+  };
+  assets: RadarAsset[];             // in watchlist order
+  missingTickers: string[];         // watched, but no longer in the universe
+  signals: RadarSignal[];           // last 24h on watched names, newest first
+  lenses: RadarLens[];              // in watchlist order
+  alerts: { unseen: number; fires: AlertFire[] };
+}
+
 export interface VaultConstituent {
   symbol: string;
   tokenAddress: `0x${string}`;

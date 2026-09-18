@@ -2,8 +2,12 @@ import { TRPCError } from "@trpc/server";
 import { eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
+import type { MarketRadar } from "@shared/contracts.ts";
+
 import { universe, watchlists } from "../db/schema.ts";
 import { loadLenses } from "../lenses/load.ts";
+import { invalidateRadar, readRadarCache, writeRadarCache } from "../radar/cache.ts";
+import { composeRadar } from "../radar/compose.ts";
 import { protectedProcedure, router, type Context } from "../trpc.ts";
 
 /**
@@ -128,6 +132,23 @@ export const watchlistRouter = router({
           set: { tickers, themes, updatedAt: now },
         });
 
+      await invalidateRadar(ctx, ctx.session.address);
       return { ok: true };
     }),
+
+  /**
+   * The Market Radar: watched assets with their data-quality flags and latest
+   * signals, watched lenses, and unread alert fires, in one call. Composed from
+   * worker-written rows only (no RPC), cached per wallet for a few seconds, and
+   * invalidated by the caller's own writes. See `radar/compose.ts`.
+   */
+  radar: protectedProcedure.query(async ({ ctx }): Promise<MarketRadar> => {
+    const address = ctx.session.address;
+    const cached = await readRadarCache(ctx, address);
+    if (cached !== null) return cached;
+
+    const radar = await composeRadar(ctx, address);
+    await writeRadarCache(ctx, address, radar);
+    return radar;
+  }),
 });
